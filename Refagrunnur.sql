@@ -2,75 +2,84 @@
 --Gagnatöflur
 
 CREATE TABLE GRENI (
-	int   			CHAR(7) NOT NULL,
+	Id   			CHAR(7) PRIMARY KEY,
+	Nafn			VARCHAR(50),
 	Stadsetning		POINT,
 	SveitarfelagID	CHAR(7),
-	Lysing			TEXT,
-	PRIMARY KEY (Id)
-)
+	Lysing			TEXT
+);
 
-CREATE TABLE UTBURDUR (
-	Id		        CHAR(7) NOT NULL,
+CREATE TABLE AGN (
+	Id		        CHAR(7) PRIMARY KEY,
 	Stadsetning		POINT,
-	SveitarfelagID	CHAR(7)
+	SveitarfelagID	CHAR(7),
 	Dagsetning		DATE,
 	Lysing			TEXT,
 	Skothus			BOOLEAN,
-	Ljos			BOOLEAN,
-	PRIMARY KEY (Id)
-)
+	Ljos			BOOLEAN
+);
 
-CREATE TABLE NOTANDI (
-	Kennitala		CHAR(10) NOT NULL,
+CREATE TABLE NOTENDUR (
+	Kennitala		CHAR(10) PRIMARY KEY,
 	Nafn			VARCHAR(50),
 	Heimilisfang	VARCHAR(50),
 	Póstnúmer		CHAR(3),
-	SveitarfelagID	CHAR(7),
+	SveitarfelagID	CHAR(7) REFERENCES SVEITARFELOG,
 	Simi			CHAR(7),
-	Tölvupóstur		VARCHAR(50),
-	PRIMARY KEY (Kennitala)
-)
+	Tölvupóstur		VARCHAR(50)
+);
 
 CREATE TABLE VEIDIMENN (	
-	Kennitala 		CHAR(10) NOT NULL,
+	Kennitala 		CHAR(10) PRIMARY KEY,
 	Veidikortanumer CHAR(6),
 	Skotvopnaleyfi	CHAR(14),
-	PRIMARY KEY (Kennitala)
-)
+	FOREIGN KEY (Kennitala) REFERENCES NOTENDUR
+);
 
 CREATE TABLE VISINDAMENN (
-	Kennitala 		CHAR(10) NOT NULL,
-	StofnunID 		CHAR(7) NOT NULL
-)
+	Kennitala 		CHAR(10) PRIMARY KEY,
+	StofnunID 		CHAR(7) NOT NULL,
+	FOREIGN KEY (Kennitala) REFERENCES NOTENDUR
+);
 
 CREATE TABLE GRENJASKYTTUR (
 	Kennitala 		CHAR(10) NOT NULL,	
 	SveitarfelagID	CHAR(7) NOT NULL,
-	PRIMARY KEY (Kennitala, SveitarfelagID)
-)
+	PRIMARY KEY (Kennitala, SveitarfelagID),
+	FOREIGN KEY (Kennitala) REFERENCES VEIDIMENN,
+	FOREIGN KEY (SveitarfelagID) REFERENCES SVEITARFELOG
+);
 
 CREATE TABLE REFIR (
-	RefurID 		CHAR(7) NOT NULL,
-	Aldur			INT,
+	RefurID 		CHAR(7) PRIMARY KEY,
+	Aldur			INTEGER,
 	Kyn				CHAR(7),
-	Lysing			TEXT,
-	PRIMARY KEY (RefurID)
-)
+	Thyngd			INTEGER,
+	Lysing			TEXT
+);
 
 CREATE TABLE SJUKDOMAR (
-	SjukdomurID		CHAR(7) NOT NULL,
-	Nafn			VARCHAR(50),
-	Lysing			TEXT,
-	PRIMARY KEY (SjukdomurID)
-)
+	SjukdomurID		CHAR(7) PRIMARY KEY,
+	Nafn			VARCHAR(50) UNIQUE NOT NULL,
+	Lysing			TEXT
+);
 
 CREATE TABLE LITIR (
-	LiturID			CHAR(7) NOT NULL,
-	Nafn			VARCHAR(50),
-	Lysing			TEXT,
-	PRIMARY KEY (LiturID)
-)
+	LiturID			CHAR(7) PRIMARY KEY,
+	Nafn			VARCHAR(50) UNIQUE NOT NULL,
+	Lysing			TEXT
+);
 
+CREATE TABLE SVEITARFELOG (
+	SveitarfelagID	CHAR(7) PRIMARY KEY,
+	Nafn			VARCHAR(50) UNIQUE NOT NULL,
+	Kennitala		CHAR(10),
+	Heimilisfang	VARCHAR(50),
+	Postnumer		CHAR(3),
+	Simi			CHAR(7),
+	Netfang			VARCHAR(50),
+	Heimasida		VARCHAR(50)
+);
 --Tengitoflur
 
 CREATE TABLE SYKTIRREFIR (
@@ -78,51 +87,58 @@ CREATE TABLE SYKTIRREFIR (
 	SjukdomurID		CHAR(7) NOT NULL,
 	Lysing			TEXT,
 	PRIMARY KEY (RefurID, SjukdomurID),
-	FOREIGN KEY RefurID REFERENCES REFIR,
-	FOREIGN KEY SjukdomurID REFERECES SJUKDOMAR
-)
+	FOREIGN KEY (RefurID) REFERENCES REFIR,
+	FOREIGN KEY (SjukdomurID) REFERENCES SJUKDOMAR
+);
 
 CREATE TABLE VITJADGRENIS (
-	Id				CHAR(7) NOT NULL,
+	Id				CHAR(7) PRIMARY KEY,
 	GreniID			CHAR(7) NOT NULL,
 	Kennitala		CHAR(10),
-	Dagsetning		DATE,
+	Dagsetning		DATE NOT NULL,
 	Virkt			BOOLEAN,
-	PRIMARY KEY (Id)
-)
+	Lysing			TEXT,
+	FOREIGN KEY (GreniID) REFERENCES GRENI (GreniID)
+);
 
 CREATE TABLE AGRENI (
-	Id				CHAR(7) NOT NULL,
-	GreniID			CHAR(7),
-	Dagsetning		DATE,
-	TimiFra			TIME,
-	TimiTil			TIME,
-	PRIMARY KEY (Id)
-)
+	Id				CHAR(7) PRIMARY KEY,
+	GreniID			CHAR(7) NOT NULL,
+	Dagsetning		DATE NOT NULL,
+	TimiFra			TIME NOT NULL,
+	TimiTil			TIME
+);
 
 CREATE TABLE SKYTTURAGRENI (
 	Kennitala		CHAR(10) NOT NULL,
-	AGreniID		CHA(7) NOT NULL,
+	AGreniID		CHAR(7) NOT NULL,
 	PRIMARY KEY (Kennitala, AGreniID),
 	FOREIGN KEY (Kennitala) REFERENCES GRENJASKYTTUR,
 	FOREIGN KEY (AGreniID) REFERENCES AGreni (Id)
-)
+);
 
-CREATE TABLE AUTBURDI (
-	Id				CHAR(7) NOT NULL,
-	UtburdurID		CHAR(7),
-	Dagsetning		DATE,
-	TimiFra			TIME,
+CREATE TABLE AAGNI (
+	Id				CHAR(7) PRIMARY KEY,
+	AgnID			CHAR(7) NOT NULL,
+	Dagsetning		DATE NOT NULL,
+	TimiFra			TIME NOT NULL,
 	TimiTil			TIME
-	PRIMARY KEY (Id)
-)
+);
 
-CREATE TABLE SKYTTURAUTBURDI (
+CREATE TABLE SKYTTURAAGNI (
 	Kennitala		CHAR(10) NOT NULL,
-	AUtburdiID		CHA(7) NOT NULL,
-	PRIMARY KEY (Kennitala, AUtburdiID),
+	AAgniID			CHAR(7) NOT NULL,
+	PRIMARY KEY (Kennitala, AAgniID),
 	FOREIGN KEY (Kennitala) REFERENCES VEIDIMENN,
-	FOREIGN KEY (AUtburdurID) REFERENCES AUTBURDI (Id)
-)
+	FOREIGN KEY (AAgniID) REFERENCES AAGNI (Id)
+);
+
+CREATE TABLE REFURSAST (
+	Id				CHAR(7) NOT NULL,
+	Kennitala		CHAR(10),
+	Stadsetning		POINT,
+	Dagsetning		DATE,
+	Timi			TIME
+);
 
 -------------------------
